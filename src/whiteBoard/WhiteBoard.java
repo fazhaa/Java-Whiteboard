@@ -16,7 +16,7 @@ public class WhiteBoard extends JFrame{
 	private Box colorsBox = new Box(BoxLayout.X_AXIS);
 	private Box textBox = new Box(BoxLayout.X_AXIS);
 	private Box layersBox = new Box(BoxLayout.X_AXIS);
-	private Box coordsBox = new Box(BoxLayout.X_AXIS);
+	//private Box coordsBox = new Box(BoxLayout.X_AXIS);
 	private JButton rect = new JButton("Rect");
 	private JButton oval = new JButton("Oval");
 	private JButton line = new JButton("Line");
@@ -40,16 +40,16 @@ public class WhiteBoard extends JFrame{
 		shapesBox.add(oval);
 		shapesBox.add(line);
 		shapesBox.add(text);
-		shapesBox.setMaximumSize(new Dimension(400, 30));
+		shapesBox.setMinimumSize(new Dimension(400, 50));
 		colorsBox.add(setColor);
-		colorsBox.setMaximumSize(new Dimension(400, 30));
+		colorsBox.setMinimumSize(new Dimension(400, 50));
 		textBox.add(textField);
 		textBox.add(textArea);
-		textBox.setMaximumSize(new Dimension(400, 20));
+		textBox.setMinimumSize(new Dimension(400, 40));
 		layersBox.add(moveToFront);
 		layersBox.add(moveToBack);
 		layersBox.add(removeShape);
-		layersBox.setMaximumSize(new Dimension(400, 30));
+		layersBox.setMinimumSize(new Dimension(400, 50));
 		
 		colNames.add("X");
 		colNames.add("Y");
@@ -57,7 +57,9 @@ public class WhiteBoard extends JFrame{
 		colNames.add("Height");
 		
 		coordTable = new JTable(rowData, colNames);
-		coordsBox.add(coordTable);
+		JScrollPane coordsPane = new JScrollPane(coordTable);
+		coordsPane.setMinimumSize(new Dimension(400, 130));
+		//coordsBox.add(coordTable);
 		
 		setBoxAlignment(shapesBox);
 		setBoxAlignment(colorsBox);
@@ -65,19 +67,22 @@ public class WhiteBoard extends JFrame{
 		setBoxAlignment(layersBox);
 		
 		Box leftVertical = new Box(BoxLayout.Y_AXIS);
+		leftVertical.setMinimumSize(new Dimension(399, 400));
 		leftVertical.add(shapesBox);
 		leftVertical.add(colorsBox);
 		leftVertical.add(textBox);
 		leftVertical.add(layersBox);
-		leftVertical.add(coordsBox);
+		leftVertical.add(coordsPane);
 		setBoxAlignment(leftVertical);
+		setResizable(false);
 		
-		theCanvas.setLayout(new BorderLayout());
 		this.setLayout(new BorderLayout());
 		this.add(leftVertical, BorderLayout.WEST);
 		this.add(theCanvas, BorderLayout.CENTER);
+		//theCanvas.setVisible(true);
 		this.setSize(800, 400);
-		coordTable.setVisible(true);
+		theCanvas.setVisible(true);
+		coordsPane.setVisible(true);
 		this.setVisible(true);
 		
 	}
