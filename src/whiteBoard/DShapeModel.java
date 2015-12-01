@@ -1,64 +1,79 @@
 package whiteBoard;
 
 import java.awt.Color;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 
 
 public class DShapeModel implements Serializable{
 	
 	
 	/**
-	 * 
+	 * Auto generated serial version UID
 	 */
 	private static final long serialVersionUID = -4348923638727655656L;
-	protected int xLoc;
-	protected int yLoc;
-	protected int width;
-	protected int height;
-	protected Rectangle bounds;
-	private Color boundCol;
+	protected Rectangle boundsRect;
+	protected Color boundCol;
+	protected int shapeID;
+	protected Collection<dsmListener> dsmEventListeners;
+	
+	public static interface dsmListener{
+		public void dsmChanged(DShapeModel dsm);
+	}
 	
 	DShapeModel(){
-		xLoc = 0;
-		yLoc = 0;
-		width = 0;
-		height = 0;
-		bounds = new Rectangle(xLoc, yLoc, width, height);
+		boundsRect = new Rectangle(0, 0, 0, 0);
 		setColor(Color.GRAY);
+		dsmEventListeners = new ArrayList<dsmListener>();
+		shapeID = -1;
 	}
 	
-	DShapeModel(int newX, int newY, int newWidth, int newHeight){
-		xLoc = newX;
-		yLoc = newY;
-		width = newWidth;
-		height = newHeight;
-		bounds = new Rectangle(xLoc, yLoc, width, height);
-		setColor(Color.GRAY);
-	}
-	
-	public int getX(){ return xLoc; }
-	
-	public int getY(){ return yLoc; }
-	
-	public int getWidth(){ return width; }
-	
-	public int getHeight(){ return height; }
-	
-	public Rectangle getRect(){ return bounds; }
+	public Rectangle getRect(){ return boundsRect; }
 	
 	public Color getColor(){ return boundCol; }
 	
-	public void setX(int newX){ xLoc = newX; }
+	public int getShapeID(){ return shapeID; }
 	
-	public void setY(int newY){ yLoc = newY; }
+	public Point getLocation(){ return boundsRect.getLocation(); }
 	
-	public void setWidth(int newWidth){ width = newWidth; }
+	public void setRect(Rectangle newRect){
+		if(this.boundsRect != newRect){
+			boundsRect = newRect;
+			notifyListeners();
+		}
+	}
 	
-	public void setHeight(int newHeight){ height = newHeight; }
+	public void setColor(Color newCol){ 
+		if(this.boundCol != newCol){
+			boundCol = newCol;
+			notifyListeners();
+		}
+	}
+
+	public void setShapeID(int newShapeID){
+		shapeID = newShapeID;
+	}
 	
-	public void setRect(Rectangle newRect){ bounds = newRect; }
+	public void setLocation(Point newLoc){
+		boundsRect.x = newLoc.x;
+		boundsRect.y = newLoc.y;
+		notifyListeners();
+	}
 	
-	public void setColor(Color newCol){ boundCol = newCol; }
+	protected void notifyListeners(){
+		for(dsmListener listener : dsmEventListeners)
+			listener.dsmChanged(this);
+	}
+	
+	public void addDsmListener(dsmListener listener){
+		dsmEventListeners.add(listener);
+	}
+	
+	public boolean removeDsmListener(dsmListener listener){
+		return dsmEventListeners.remove(listener);
+	}
 	
 }

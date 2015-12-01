@@ -2,27 +2,15 @@ package whiteBoard;
 
 import java.awt.Graphics;
 
-public class DShape {
+public abstract class DShape {
 	
-	protected DShapeModel shape;
+	protected DShapeModel shapeModel;
+	abstract void draw(Graphics g);
 	
-	DShape(){
-		shape = new DShapeModel();
-	}
+	protected DShapeModel getShapeModel(){ return shapeModel; }
 	
-	DShape(DShapeModel dsm){
-		shape = dsm;
-	}
-	
-	protected void setShape(DShapeModel newShape){
-		shape = newShape;
-	}
-	
-	protected DShapeModel getShape(){ return shape; }
-	
-	protected void draw(Graphics g){
-		g.drawRect(shape.getX(), shape.getY(), shape.getWidth(), shape.getHeight());
-		g.setColor(shape.getColor());
+	protected void setShapeModel(DShapeModel newShape){
+		shapeModel = newShape;
 	}
 
 }

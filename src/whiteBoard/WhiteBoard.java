@@ -100,9 +100,10 @@ public class WhiteBoard extends JFrame{
 		this.add(theCanvas, BorderLayout.CENTER);
 		//theCanvas.setVisible(true);
 		this.setSize(800, 400);
-		theCanvas.setVisible(true);
-		coordsPane.setVisible(true);
+		//theCanvas.setVisible(true);
+		//coordsPane.setVisible(true);
 		this.setVisible(true);
+		startButtonListeners();
 		
 	}
 	
@@ -115,6 +116,21 @@ public class WhiteBoard extends JFrame{
 	protected ShapeTableModel getShapeTableModel(){
 		ShapeTableModel sTmod = new ShapeTableModel();
 		return sTmod;
+	}
+	
+	protected void startButtonListeners(){
+		
+		final WhiteBoard thisBoard = this;
+		rect.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				addNewModel(new DRectModel());
+			}
+		});
+	}
+	
+	protected void addNewModel(DShapeModel dsm){
+		dsm.setRect(theCanvas.randomBoundsGenerator());
+		theCanvas.addShape(dsm);
 	}
 	
 	public static void main(String[] args){
