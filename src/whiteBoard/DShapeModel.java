@@ -26,7 +26,7 @@ public class DShapeModel implements Serializable{
 	
 	DShapeModel(){
 		boundsRect = new Rectangle(0, 0, 0, 0);
-		setColor(Color.GRAY);
+		boundCol = Color.GRAY;
 		dsmEventListeners = new ArrayList<dsmListener>();
 		shapeID = -1;
 	}
