@@ -1,6 +1,8 @@
 package whiteBoard;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Vector;
 
 import javax.swing.*;
@@ -8,58 +10,75 @@ import javax.swing.text.*;
 
 public class WhiteBoard extends JFrame{
 	
+	
 	/**
-	 * Serial Version UID is required, used default
+	 * Default generated serial version UID
 	 */
-	private static final long serialVersionUID = 1L;
-	private Box shapesBox = new Box(BoxLayout.X_AXIS);
-	private Box colorsBox = new Box(BoxLayout.X_AXIS);
-	private Box textBox = new Box(BoxLayout.X_AXIS);
-	private Box layersBox = new Box(BoxLayout.X_AXIS);
-	//private Box coordsBox = new Box(BoxLayout.X_AXIS);
-	private JButton rect = new JButton("Rect");
-	private JButton oval = new JButton("Oval");
-	private JButton line = new JButton("Line");
-	private JButton text = new JButton("Text");
-	private JButton setColor = new JButton("Set Color");
-	private JButton moveToFront = new JButton("Move To Front");
-	private JButton moveToBack = new JButton("Move To Back");
-	private JButton removeShape = new JButton("Remove Shape");
-	private JTextField textField = new JTextField();
-	private JTextArea textArea = new JTextArea("Font", 1, 1);
-	private Vector<Vector<Integer>> rowData = new Vector<Vector<Integer>>();
-	private Vector<String> colNames = new Vector<String>();
+	private static final long serialVersionUID = -3690401036973293224L;
+	public static final String[] COL_NAMES = new String[] {"x", "y", "Width", "Height" };
+	public static final String[] FONT_NAMES = new String[] {"Font Select"};
+	
+	private Object[][] rowData;
+	private Box shapesBox;
+	private Box colorsBox;
+	private Box textBox;
+	private Box layersBox;
+	
+	private JButton rect;
+	private JButton oval;
+	private JButton line;
+	private JButton text;
+	private JButton setColor;
+	private JButton moveToFront;
+	private JButton moveToBack;
+	private JButton removeShape;
+	private JTextField textField;
+	private JComboBox textSelect;
+	//private Vector<Vector<Integer>> rowData = new Vector<Vector<Integer>>();
+	//private Vector<String> colNames = new Vector<String>();
 
 	private JTable coordTable;
-	private Canvas theCanvas = new Canvas();
+	private Canvas theCanvas;
 	
 	public WhiteBoard(){
 		
+		super("White Board");
+		shapesBox = new Box(BoxLayout.X_AXIS);
+		colorsBox = new Box(BoxLayout.X_AXIS);
+		textBox = new Box(BoxLayout.X_AXIS);
+		layersBox = new Box(BoxLayout.X_AXIS);
+		theCanvas = new Canvas();
 		shapesBox.setName("Add");
-		shapesBox.add(rect);
-		shapesBox.add(oval);
-		shapesBox.add(line);
-		shapesBox.add(text);
-		shapesBox.setMinimumSize(new Dimension(400, 50));
-		colorsBox.add(setColor);
-		colorsBox.setMinimumSize(new Dimension(400, 50));
-		textBox.add(textField);
-		textBox.add(textArea);
-		textBox.setMinimumSize(new Dimension(400, 40));
+		shapesBox.add(rect = new JButton("Rect"));
+		shapesBox.add(oval = new JButton("Oval"));
+		shapesBox.add(line = new JButton("Line"));
+		shapesBox.add(text = new JButton("Text"));
+		//shapesBox.setMinimumSize(new Dimension(400, 50));
+		
+		colorsBox.add(setColor = new JButton("Set Color"));
+		//colorsBox.setMinimumSize(new Dimension(400, 50));
+		
+		textBox.add(textField = new JTextField("White Board!"));
+		textSelect = new JComboBox();
+		String[] availFonts = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+		for(String font : availFonts)
+			textSelect.addItem(font);
+		for(String fontName : FONT_NAMES)
+			textSelect.setSelectedItem(fontName);
+		textBox.add(textSelect);
+		textField.setMaximumSize(new Dimension(255, 20));
+		textSelect.setMaximumSize(new Dimension(255, 20));
+		//textBox.setMinimumSize(new Dimension(400, 40));
+		
 		layersBox.add(moveToFront);
 		layersBox.add(moveToBack);
 		layersBox.add(removeShape);
-		layersBox.setMinimumSize(new Dimension(400, 50));
+		//layersBox.setMinimumSize(new Dimension(400, 50));
 		
-		colNames.add("X");
-		colNames.add("Y");
-		colNames.add("Width");
-		colNames.add("Height");
 		
-		coordTable = new JTable(rowData, colNames);
+		coordTable = new JTable(rowData, COL_NAMES);
+		coordTable.setModel(getShapeTableModel());
 		JScrollPane coordsPane = new JScrollPane(coordTable);
-		coordsPane.setMinimumSize(new Dimension(400, 130));
-		//coordsBox.add(coordTable);
 		
 		setBoxAlignment(shapesBox);
 		setBoxAlignment(colorsBox);
@@ -74,7 +93,7 @@ public class WhiteBoard extends JFrame{
 		leftVertical.add(layersBox);
 		leftVertical.add(coordsPane);
 		setBoxAlignment(leftVertical);
-		setResizable(false);
+		//setResizable(false);
 		
 		this.setLayout(new BorderLayout());
 		this.add(leftVertical, BorderLayout.WEST);
@@ -91,6 +110,11 @@ public class WhiteBoard extends JFrame{
 	private void setBoxAlignment(Box bx){
 		for(Component comp : bx.getComponents())
 			((JComponent)comp).setAlignmentX(Box.LEFT_ALIGNMENT);
+	}
+	
+	protected ShapeTableModel getShapeTableModel(){
+		ShapeTableModel sTmod = new ShapeTableModel();
+		return sTmod;
 	}
 	
 	public static void main(String[] args){

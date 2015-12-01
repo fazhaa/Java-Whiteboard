@@ -4,9 +4,15 @@ import java.awt.Graphics;
 
 public class DShape {
 	
-	private DShapeModel shape;
+	protected DShapeModel shape;
 	
-	DShape(){}
+	DShape(){
+		shape = new DShapeModel();
+	}
+	
+	DShape(DShapeModel dsm){
+		shape = dsm;
+	}
 	
 	protected void setShape(DShapeModel newShape){
 		shape = newShape;
@@ -14,8 +20,9 @@ public class DShape {
 	
 	protected DShapeModel getShape(){ return shape; }
 	
-	/*protected void draw(Graphics g){
-		g.
-	}*/
+	protected void draw(Graphics g){
+		g.drawRect(shape.getX(), shape.getY(), shape.getWidth(), shape.getHeight());
+		g.setColor(shape.getColor());
+	}
 
 }

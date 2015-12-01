@@ -7,7 +7,7 @@ import javax.swing.*;
 
 public class Canvas extends JPanel{
 	
-	private ArrayList<DShape> shapeList;
+	protected ArrayList<DShape> shapeList;
 	
 	Canvas(){
 		setSize(400, 400); //set size to 400x400
@@ -19,10 +19,14 @@ public class Canvas extends JPanel{
 	}
 	
 	protected void paintComponent(){
-		
 		for(DShape shape : shapeList){
-			//shape.getShape().)
+			shape.draw(getGraphics());
 		}
+	}
+	
+	protected void addShape(DShapeModel dsm){
+		shapeList.add(new DShape(dsm));
+		paintComponent();
 	}
 
 }

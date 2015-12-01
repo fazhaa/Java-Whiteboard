@@ -1,16 +1,22 @@
 package whiteBoard;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.io.Serializable;
 
-public class DShapeModel {
+
+public class DShapeModel implements Serializable{
 	
-	private int xLoc;
-	private int yLoc;
-	private int width;
-	private int height;
-	private Rectangle bounds;
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4348923638727655656L;
+	protected int xLoc;
+	protected int yLoc;
+	protected int width;
+	protected int height;
+	protected Rectangle bounds;
 	private Color boundCol;
 	
 	DShapeModel(){
@@ -18,8 +24,8 @@ public class DShapeModel {
 		yLoc = 0;
 		width = 0;
 		height = 0;
-		bounds = new Rectangle();
-		boundCol = Color.gray;
+		bounds = new Rectangle(xLoc, yLoc, width, height);
+		setColor(Color.GRAY);
 	}
 	
 	DShapeModel(int newX, int newY, int newWidth, int newHeight){
@@ -28,7 +34,7 @@ public class DShapeModel {
 		width = newWidth;
 		height = newHeight;
 		bounds = new Rectangle(xLoc, yLoc, width, height);
-		boundCol = Color.gray;
+		setColor(Color.GRAY);
 	}
 	
 	public int getX(){ return xLoc; }
