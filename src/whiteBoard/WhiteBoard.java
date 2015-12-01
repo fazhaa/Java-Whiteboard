@@ -70,9 +70,9 @@ public class WhiteBoard extends JFrame{
 		textSelect.setMaximumSize(new Dimension(255, 20));
 		//textBox.setMinimumSize(new Dimension(400, 40));
 		
-		layersBox.add(moveToFront);
-		layersBox.add(moveToBack);
-		layersBox.add(removeShape);
+		layersBox.add(moveToFront = new JButton("Move To Front"));
+		layersBox.add(moveToBack = new JButton("Move To Back"));
+		layersBox.add(removeShape = new JButton("Remove Shape"));
 		//layersBox.setMinimumSize(new Dimension(400, 50));
 		
 		
