@@ -126,6 +126,11 @@ public class WhiteBoard extends JFrame{
 				addNewModel(new DRectModel());
 			}
 		});
+		oval.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				addNewModel(new DOvalModel());
+			}
+		});
 	}
 	
 	protected void addNewModel(DShapeModel dsm){
