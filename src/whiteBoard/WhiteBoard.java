@@ -10,6 +10,8 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.text.*;
 
+import java.io.*;
+@SuppressWarnings("unchecked")
 public class WhiteBoard extends JFrame{
 	
 	
@@ -33,6 +35,8 @@ public class WhiteBoard extends JFrame{
 	private JButton moveToFront;
 	private JButton moveToBack;
 	private JButton removeShape;
+	private JButton save;
+	private JButton open;
 	private JTextField textField;
 	private JComboBox textSelect;
 	/**
@@ -117,6 +121,8 @@ public class WhiteBoard extends JFrame{
 		shapesBox.add(oval = new JButton("Oval"));
 		shapesBox.add(line = new JButton("Line"));
 		shapesBox.add(text = new JButton("Text"));
+		shapesBox.add(save = new JButton("Save"));
+		shapesBox.add(open = new JButton("Open"));
 		//shapesBox.setMinimumSize(new Dimension(400, 50));
 		
 		/*Color Chooser*/
@@ -289,6 +295,25 @@ public class WhiteBoard extends JFrame{
 			}
 		});
 		
+		save.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String result = JOptionPane.showInputDialog("File Name", null);
+                if (result != null) {
+                    File f = new File(result);
+                    theCanvas.save(f);
+                }
+			}
+		});
+		
+		open.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String result = JOptionPane.showInputDialog("File Name", null);
+                if (result != null) {
+                    File f = new File(result);
+                    theCanvas.open(f);
+                }
+			}
+		});
 	}
 	
 	protected void addNewModel(DShapeModel dsm){

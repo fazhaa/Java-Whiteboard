@@ -4,9 +4,13 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.util.ArrayList;
+import java.util.*;
 
 import javax.swing.*;
+
+import java.beans.*;
+import java.io.*;
+import java.net.*;
 
 public class Canvas extends JPanel{
 	
@@ -18,6 +22,17 @@ public class Canvas extends JPanel{
 	//Listener ArrayLists
 	protected ArrayList<ShapeListListener> shapeListListeners;
 	protected ArrayList<SelectionListener> selectionListeners;
+	
+	//System variables
+	private java.util.List<ObjectOutputStream> outStreams =
+            new ArrayList<ObjectOutputStream>();
+	boolean dirty = false;
+	static String port_default = "8001";
+	static String host_default = "127.0.0.1";
+	private ClientHandler clientHandler;
+    private ServerAccepter serverAccepter;
+    String mode = "";
+    String[] cmdList = {"add", "remove", "front", "back", "change"};
 	
 	//internal interface to keep track of shapes
 	protected static interface ShapeListListener{
@@ -257,5 +272,205 @@ public class Canvas extends JPanel{
 			}
 		});
 	}
-
+	
+	private void clear() {
+		shapeList.clear();
+		dirty = false;
+		repaint();
+	}
+	
+	// Storage, Networking related methods	
+		public void save(File file){
+			try {
+				XMLEncoder xmlOut = new XMLEncoder(
+			            new BufferedOutputStream(
+			            new FileOutputStream(file)));
+				
+				DShape[] shapes = shapeList.toArray(new DShape[0]); 
+				DShapeModel[] shapeModels = new DShapeModel[shapes.length];
+				for (int i = 0; i < shapes.length; i++){
+					shapeModels[i] = shapes[i].shapeModel;
+				}
+				
+				xmlOut.writeObject(shapeModels);
+				xmlOut.close();
+				dirty = false;
+			}
+			catch (IOException e) {
+	            e.printStackTrace();
+	        }
+			
+		}
+		
+		public void open(File file) {
+			DShapeModel[] shapeModels = null;
+			try {
+	            // Create an XMLDecoder around the file
+	            XMLDecoder xmlIn = new XMLDecoder(new BufferedInputStream(
+	            new FileInputStream(file)));
+	            shapeModels = (DShapeModel[]) xmlIn.readObject();
+	            xmlIn.close();
+	            clear();
+	            for(DShapeModel dm:shapeModels) {
+	                addShape(dm);
+	            }
+	            dirty = false;
+	        }
+	        catch (IOException e) {
+	            e.printStackTrace();
+	        }
+			
+		}
+		// Send the new changes from server to all the clients
+		public synchronized void sendToAllRemotes(int cmdIndex, DShapeModel target) {
+			OutputStream memStream = new ByteArrayOutputStream();
+			XMLEncoder encoder = new XMLEncoder(memStream);
+			
+			encoder.writeObject(target);
+			encoder.close();
+			String xmlString = memStream.toString();
+			//System.out.println(xmlString);
+			// Push xmlString of DShapeModel object to all clients
+			Iterator<ObjectOutputStream> it = outStreams.iterator();
+			while (it.hasNext()) {
+				ObjectOutputStream out = it.next();
+				try {
+					out.writeObject(new String(cmdList[cmdIndex]));
+					out.flush();
+					out.writeObject(xmlString);
+					out.flush();
+				}
+				catch (Exception ex) {
+					ex.printStackTrace();
+					it.remove();
+					// Cute use of iterator and exceptions --
+					// drop that socket from list if have probs with it
+				}
+			}	        
+		}
+		// Send the current settings to the new added client
+		public synchronized void sendAllToRemote(ObjectOutputStream outStr) {
+			//Convert all the DShapeModel objects into a xmlString
+			//There are potential redundancies in here
+			OutputStream memStream = new ByteArrayOutputStream();
+			XMLEncoder encoder = new XMLEncoder(memStream);
+			DShape[] shapes = shapeList.toArray(new DShape[0]);
+			DShapeModel[] shapeModels = new DShapeModel[shapes.length];
+			for (int i = 0; i < shapes.length; i++){
+				shapeModels[i] = shapes[i].shapeModel;
+			}
+			encoder.writeObject(shapeModels);
+			encoder.close();
+			String xmlString = memStream.toString();
+			// Push xmlString of DShapeModel objects to all clients
+			try	{
+				outStr.writeObject(xmlString);
+				outStr.flush();
+			}
+			catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		}
+		
+		
+		
+		public synchronized void addOutStream(ObjectOutputStream outStr) {
+	    	outStreams.add(outStr);
+	    }
+		
+		public void doServer() {
+	    	//status.setText("Start server");
+	    	mode = new String("Server");
+	        String result = JOptionPane.showInputDialog("Run server on port", port_default);
+	        if (result!=null) {
+	            System.out.println("server: start");
+	            serverAccepter = new ServerAccepter(Integer.parseInt(result.trim()));
+	            serverAccepter.start();
+	        }
+	  	}
+	 
+	  	public void doClient() {
+	    	//status.setText("Start client");
+	    	mode = new String("Client");
+	        String result = JOptionPane.showInputDialog("Connect to host:port", 
+	        											host_default + ":" + port_default);
+	        if (result != null) {
+	            String[] parts = result.split(":");
+	            System.out.println("client: start");
+	            clientHandler = new ClientHandler(parts[0].trim(), Integer.parseInt(parts[1].trim()));
+	            clientHandler.start();
+	        }
+	 	} 
+	
+	/**
+     * Internal class to handle connection, and function for Client.
+     * Client will run in Read-only mode, so it only listens to changes from Server.
+     */
+  	private class ClientHandler extends Thread {
+  		private String host;
+  		private int port;
+  		//DotModel[] dotArray = null;
+  		ClientHandler(String host, int port) {
+  			this.host = host;
+  			this.port = port;
+  		}
+	
+  		public void run(){
+  			try {
+  				Socket toServerSock = new Socket(host, port);
+  				ObjectInputStream fromServer = new ObjectInputStream(toServerSock.getInputStream());
+  				System.out.println("client connected " + host + port);
+  				//Update the whiteboard from server
+  				clear();
+  				String xmlString = (String) fromServer.readObject();
+  				XMLDecoder decoder = new XMLDecoder(new ByteArrayInputStream(xmlString.getBytes()));
+  				DShapeModel[] ShapeModels = (DShapeModel[]) decoder.readObject();
+  				decoder.close();
+  				for (DShapeModel dsm:ShapeModels){
+  					addShape(dsm);
+  				}
+  				//Listen to new changes from the server
+  				while (true) {
+  					String cmd = (String) fromServer.readObject();
+  					xmlString = (String) fromServer.readObject();
+  					decoder = new XMLDecoder(new ByteArrayInputStream(xmlString.getBytes()));
+  					DShapeModel newDSM = (DShapeModel) decoder.readObject();
+  					decoder.close();
+  					//TODO: Base on the cmd String, modify the newDSM correctly
+  				}
+  			}
+  			catch(Exception ex) {
+  				ex.printStackTrace();
+  			}
+  		}
+  	 }
+ 
+	/**
+	 * Internal class to handle connections, and function for Server.
+	 * Server is write-only, so it won't handle any changes from the clients.
+	 */
+  	private class ServerAccepter extends Thread {
+	  	private int port;
+	  	ServerAccepter(int port){
+		this.port = port;
+	  	}
+	  	public void run() {
+	  		try {
+	  			ServerSocket serverSocket = new ServerSocket(port);
+	  			while(true) {
+	  				Socket toClientSock = null;
+	  				toClientSock = serverSocket.accept();
+	  				System.out.println("Server: client connected");
+	  				ObjectOutputStream newClientOut = new ObjectOutputStream(toClientSock.getOutputStream());
+	  				//Send the current config to the newly added Client
+	  				sendAllToRemote(newClientOut);
+	  				//Establish new output stream to the new added client
+	  				addOutStream(newClientOut);
+	  			}
+	  		}
+	  		catch (IOException ex) {
+			ex.printStackTrace();
+	  		}
+	  	}
+  	}
 }
