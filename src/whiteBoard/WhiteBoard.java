@@ -30,12 +30,18 @@ public class WhiteBoard extends JFrame{
 	private JButton oval;
 	private JButton line;
 	private JButton text;
-	private JButton setColor;
 	private JButton moveToFront;
 	private JButton moveToBack;
 	private JButton removeShape;
 	private JTextField textField;
 	private JComboBox textSelect;
+	/**
+	 * Color Chooser
+	 */
+	private JButton setColor;
+	private JFrame	colorFrame;
+	private JColorChooser	colorChooser;
+	private JButton colorOk;
 	//private Vector<Vector<Integer>> rowData = new Vector<Vector<Integer>>();
 	//private Vector<String> colNames = new Vector<String>();
 
@@ -113,7 +119,15 @@ public class WhiteBoard extends JFrame{
 		shapesBox.add(text = new JButton("Text"));
 		//shapesBox.setMinimumSize(new Dimension(400, 50));
 		
+		/*Color Chooser*/
 		colorsBox.add(setColor = new JButton("Set Color"));
+		colorFrame = new JFrame("Choose Color");
+		colorFrame.setLayout(new BorderLayout());
+		colorFrame.add(colorChooser = new JColorChooser(), BorderLayout.WEST);
+		colorFrame.add(colorOk = new JButton("OK"), BorderLayout.EAST);
+		colorFrame.setVisible(false);
+		colorFrame.pack();
+		/*Color Chooser*/
 		//colorsBox.setMinimumSize(new Dimension(400, 50));
 		
 		textBox.add(textField = new JTextField("White Board!"));
@@ -224,6 +238,29 @@ public class WhiteBoard extends JFrame{
 				}
 			}
 		});
+		
+		/*Color Chooser*/
+		setColor.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(theCanvas.selectedShape != null)
+				{
+					colorFrame.setLocationRelativeTo(theCanvas);
+					colorFrame.setVisible(true);
+					
+					colorOk.addActionListener(new ActionListener() {
+						
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							theCanvas.selectedShape.getShapeModel().setColor(colorChooser.getColor());
+							colorFrame.setVisible(false);
+							
+						}
+					});
+					
+				}
+			}
+		});
+		/*Color Chooser*/
 		
 	}
 	
