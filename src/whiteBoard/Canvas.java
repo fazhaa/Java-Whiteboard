@@ -117,6 +117,8 @@ public class Canvas extends JPanel{
 			shape = new DOval();
 		else if(dsm instanceof DLineModel)
 			shape = new DLine();
+		else if(dsm instanceof DTextModel)
+			shape = new DText();
 		
 		shape.setShapeModel(dsm);
 		return shape;

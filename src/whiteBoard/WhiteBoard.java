@@ -193,11 +193,59 @@ public class WhiteBoard extends JFrame{
 				theCanvas.addShape(newModel);
 			}
 		});
+		text.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				final DTextModel newModel = new DTextModel();
+				newModel.setText("White Board!");
+				newModel.setFont(FONT_NAMES[0]);
+				addNewModel(newModel);
+				newModel.addDsmListener(new DShapeModel.dsmListener(){
+					public void dsmChanged(DShapeModel dsm){
+						updateTextInspector();
+					}
+				});
+			}
+		});
+		textField.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				DShape shape = theCanvas.selectedShape;
+				if(shape != null){
+					if(shape.getShapeModel() instanceof DTextModel)
+						((DTextModel)shape.getShapeModel()).setText(textField.getText());
+				}
+			}
+		});
+		textSelect.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				DShape shape = theCanvas.selectedShape;
+				if(shape != null){
+					if(shape.getShapeModel() instanceof DTextModel)
+						((DTextModel)shape.getShapeModel()).setFont(textSelect.getSelectedItem().toString());
+				}
+			}
+		});
+		
 	}
 	
 	protected void addNewModel(DShapeModel dsm){
 		dsm.setRect(theCanvas.randomBoundsGenerator());
 		theCanvas.addShape(dsm);
+	}
+	
+	protected void updateTextInspector(){
+		DShape shape = theCanvas.selectedShape;
+		if(shape != null && shape instanceof DText){
+			DTextModel dsm = ((DTextModel)shape.getShapeModel());
+			textField.setText(dsm.getText());
+			textSelect.setSelectedItem(dsm.getFont());
+			
+			textField.setEnabled(true);
+			textSelect.setEnabled(true);
+		}
+		else{
+			textField.setEnabled(false);
+			textSelect.setEnabled(false);
+		}
 	}
 	
 	public static void main(String[] args){
