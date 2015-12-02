@@ -6,6 +6,8 @@ import java.awt.event.ActionListener;
 import java.util.Vector;
 
 import javax.swing.*;
+import javax.swing.event.TableModelEvent;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.text.*;
 
 public class WhiteBoard extends JFrame{
@@ -39,6 +41,62 @@ public class WhiteBoard extends JFrame{
 
 	private JTable coordTable;
 	private Canvas theCanvas;
+	
+	
+	//anonymous inner class to represent the table
+	public class ShapeTableModel extends AbstractTableModel{
+		
+		public static final int X = 0;
+		public static final int Y = 1;
+		public static final int WIDTH = 2;
+		public static final int HEIGHT = 3;
+		
+		public ShapeTableModel() {
+			super();
+			
+			final ShapeTableModel sTmod = this;
+			theCanvas.addShapeListListener(new Canvas.ShapeListListener(){
+				DShapeModel.dsmListener listener;
+				public void shapeAdded(DShape shape){
+					fireTableChanged(new TableModelEvent(sTmod));
+					shape.getShapeModel().addDsmListener(listener = 
+							new DShapeModel.dsmListener() {
+						public void dsmChanged(DShapeModel dsm){
+							int num = theCanvas.getDsmIndexNum(dsm);
+							fireTableRowsUpdated(num, num+1);
+						}
+					});
+				}
+				
+				public void shapeRemoved(DShape shape) {
+					shape.getShapeModel().removeDsmListener(listener);
+					listener = null;
+					fireTableChanged(new TableModelEvent(sTmod));
+				}
+			});
+			
+		}
+		
+		public int getColumnCount(){
+			return HEIGHT + 1;
+		}
+		
+		public int getRowCount(){
+			return theCanvas.getShapesList().size();
+		}
+		
+		public Object getValueAt(int row, int col){
+			DShape shape = theCanvas.getShapesList().get(row);
+			if(col == X) return shape.getShapeModel().getRect().x;
+			else if(col == Y) return shape.getShapeModel().getRect().y;
+			else if(col == WIDTH) return shape.getShapeModel().getRect().width;
+			else if(col == HEIGHT) return shape.getShapeModel().getRect().height;
+			
+			return null;
+		}
+
+	}
+
 	
 	public WhiteBoard(){
 		
@@ -77,7 +135,7 @@ public class WhiteBoard extends JFrame{
 		
 		
 		coordTable = new JTable(rowData, COL_NAMES);
-		coordTable.setModel(getShapeTableModel());
+		coordTable.setModel(new ShapeTableModel());
 		JScrollPane coordsPane = new JScrollPane(coordTable);
 		
 		setBoxAlignment(shapesBox);
@@ -98,9 +156,7 @@ public class WhiteBoard extends JFrame{
 		this.setLayout(new BorderLayout());
 		this.add(leftVertical, BorderLayout.WEST);
 		this.add(theCanvas, BorderLayout.CENTER);
-		//theCanvas.setVisible(true);
 		this.setSize(800, 400);
-		//theCanvas.setVisible(true);
 		//coordsPane.setVisible(true);
 		this.setVisible(true);
 		startButtonListeners();
