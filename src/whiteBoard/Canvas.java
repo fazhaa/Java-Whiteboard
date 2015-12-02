@@ -106,6 +106,11 @@ public class Canvas extends JPanel{
 			if(shape.getShapeModel().getRect().contains(pt))
 				match = shape;
 		}
+		if(match == null)//un-select shape if clicked on white space ; remove knobs
+		{
+			selectedShape = null;
+			repaint();
+		}
 		return match;
 	}
 	
