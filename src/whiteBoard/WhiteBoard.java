@@ -151,13 +151,11 @@ public class WhiteBoard extends JFrame{
 		leftVertical.add(layersBox);
 		leftVertical.add(coordsPane);
 		setBoxAlignment(leftVertical);
-		//setResizable(false);
 		
 		this.setLayout(new BorderLayout());
 		this.add(leftVertical, BorderLayout.WEST);
 		this.add(theCanvas, BorderLayout.CENTER);
 		this.setSize(800, 400);
-		//coordsPane.setVisible(true);
 		this.setVisible(true);
 		startButtonListeners();
 		
@@ -187,6 +185,14 @@ public class WhiteBoard extends JFrame{
 				addNewModel(new DOvalModel());
 			}
 		});
+		line.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				DLineModel newModel = new DLineModel();
+				newModel.setStartPt(new Point(150, 150));
+				newModel.setEndPt(new Point(200, 200));
+				theCanvas.addShape(newModel);
+			}
+		});
 	}
 	
 	protected void addNewModel(DShapeModel dsm){
@@ -196,6 +202,7 @@ public class WhiteBoard extends JFrame{
 	
 	public static void main(String[] args){
 		WhiteBoard thisBoard = new WhiteBoard();
+		thisBoard.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
 }

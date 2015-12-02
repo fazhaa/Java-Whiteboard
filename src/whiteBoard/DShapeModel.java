@@ -39,6 +39,13 @@ public class DShapeModel implements Serializable{
 	
 	public Point getLocation(){ return boundsRect.getLocation(); }
 	
+	protected void setModel(DShapeModel newDsm){
+		boundsRect = (Rectangle) newDsm.boundsRect.clone();
+		shapeID = newDsm.shapeID;
+		boundCol = newDsm.boundCol;
+		notifyListeners();
+	}
+	
 	public void setRect(Rectangle newRect){
 		if(this.boundsRect != newRect){
 			boundsRect = newRect;
