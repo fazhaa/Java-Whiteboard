@@ -151,6 +151,30 @@ public class Canvas extends JPanel{
 				listener.shapeRemoved(shape);
 		}
 	}
+	
+	protected void shapeToFront(DShape shape){
+		if(shapeList.contains(shape))
+		{
+			System.out.println(shapeList.indexOf(shape));
+			shapeList.remove(shape);
+			shapeList.add(shape);
+			System.out.println(shapeList.indexOf(shape));
+			repaint();
+		}
+	}
+	
+	protected void shapeToBack(DShape shape){
+		if(shapeList.contains(shape))
+		{
+			System.out.println(shapeList.indexOf(shape));
+			for(int i = shapeList.indexOf(shape); i > 0; i--)
+			{
+				shapeList.set(i, shapeList.get(i-1));
+			}
+			shapeList.set(0, shape);
+			repaint();
+		}
+	}
 
 	public Rectangle randomBoundsGenerator() {
 		Rectangle boundsRect = new Rectangle();

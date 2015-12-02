@@ -262,6 +262,33 @@ public class WhiteBoard extends JFrame{
 		});
 		/*Color Chooser*/
 		
+		removeShape.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			if(theCanvas.selectedShape != null)
+			{
+				theCanvas.removeShape(theCanvas.selectedShape);
+			}
+			}
+		});
+		
+		moveToFront.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(theCanvas.selectedShape != null)
+				{
+					theCanvas.shapeToFront(theCanvas.selectedShape);
+				}
+			}
+		});
+		
+		moveToBack.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(theCanvas.selectedShape != null)
+				{
+					theCanvas.shapeToBack(theCanvas.selectedShape);
+				}
+			}
+		});
+		
 	}
 	
 	protected void addNewModel(DShapeModel dsm){
