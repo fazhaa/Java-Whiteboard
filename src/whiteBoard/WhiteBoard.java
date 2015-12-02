@@ -3,6 +3,7 @@ package whiteBoard;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.util.Vector;
 
 import javax.swing.*;
@@ -35,10 +36,22 @@ public class WhiteBoard extends JFrame{
 	private JButton moveToFront;
 	private JButton moveToBack;
 	private JButton removeShape;
-	private JButton save;
-	private JButton open;
 	private JTextField textField;
 	private JComboBox textSelect;
+	//System buttons
+	private JMenuBar mb;
+	private JMenu 	file;
+	private JMenu	network;
+	private	JMenuItem	neww;
+	private JMenuItem	save;
+	private JMenuItem	open;
+	private	JMenuItem	startServer;
+	private	JMenuItem	startClient;
+	private	JMenuItem	exit;
+	//private JButton save;
+	//private JButton open;
+	//private JButton	startServer;
+	//private JButton	startClient;
 	/**
 	 * Color Chooser
 	 */
@@ -121,9 +134,47 @@ public class WhiteBoard extends JFrame{
 		shapesBox.add(oval = new JButton("Oval"));
 		shapesBox.add(line = new JButton("Line"));
 		shapesBox.add(text = new JButton("Text"));
-		shapesBox.add(save = new JButton("Save"));
-		shapesBox.add(open = new JButton("Open"));
+		//shapesBox.add(save = new JButton("Save"));
+		//shapesBox.add(open = new JButton("Open"));
+		//shapesBox.add(startServer = new JButton("Start Server Mode"));
+		//shapesBox.add(startClient = new JButton("Start Client Mode"));
 		//shapesBox.setMinimumSize(new Dimension(400, 50));
+		
+		/* File Menu*/
+		mb = new JMenuBar();
+		
+		file = new JMenu("File");
+		file.setMnemonic(KeyEvent.VK_F);
+		network = new JMenu("Network");
+		
+		file.add(neww = new JMenuItem("New"));
+		neww.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,ActionEvent.CTRL_MASK));
+		file.addSeparator();
+		file.add(save = new JMenuItem("Save"));
+		save.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,ActionEvent.CTRL_MASK));
+		file.add(open = new JMenuItem("Open"));
+		open.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,ActionEvent.CTRL_MASK));
+		file.addSeparator();
+		file.add(exit = new JMenuItem("Exit"));
+		exit.setMnemonic(KeyEvent.VK_E);
+		exit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,ActionEvent.CTRL_MASK));
+		exit.addActionListener(new ActionListener() {
+			
+			public void actionPerformed(ActionEvent e) {
+				System.exit(0);// TODO Auto-generated method stub
+				
+			}
+		});
+		
+		network.add(startServer = new JMenuItem("Start Server"));
+		network.add(startClient = new JMenuItem("Start Client"));
+		
+		mb.add(file);
+		mb.add(network);
+		setJMenuBar(mb);
+		
+		/* File Menu*/
+		 
 		
 		/*Color Chooser*/
 		colorsBox.add(setColor = new JButton("Set Color"));
@@ -295,6 +346,51 @@ public class WhiteBoard extends JFrame{
 			}
 		});
 		
+		neww.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			if(!theCanvas.shapeList.isEmpty())
+			{
+				final JFrame caution = new JFrame("Caution");
+				Box y = new Box(BoxLayout.Y_AXIS);
+				Box x = new Box(BoxLayout.X_AXIS);
+				JLabel warning = new JLabel("Do you want to clean the whiteboard? Everything will be lost.");
+				JButton yes = new JButton("Yes");
+				JButton no = new JButton("No");
+				x.add(yes); x.add(no);
+				y.add(warning);
+				y.add(x);
+				for(Component comp : y.getComponents())
+				{
+					((JComponent)comp).setAlignmentX(Box.CENTER_ALIGNMENT);
+				}
+				caution.add(y);
+				caution.pack();
+				caution.setLocationByPlatform(true);
+				caution.setVisible(true);
+				no.addActionListener(new ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						caution.setVisible(false);
+						caution.dispose();
+					}
+				});
+				
+				yes.addActionListener(new ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						theCanvas.shapeList.clear();
+						theCanvas.repaint();
+						caution.dispose();
+					}
+				});
+				
+				
+			}
+			}
+		});
+		
 		save.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String result = JOptionPane.showInputDialog("File Name", null);
@@ -312,6 +408,18 @@ public class WhiteBoard extends JFrame{
                     File f = new File(result);
                     theCanvas.open(f);
                 }
+			}
+		});
+		
+		startServer.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+               theCanvas.doServer();
+			}
+		});
+		
+		startClient.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+	               theCanvas.doClient();
 			}
 		});
 	}
@@ -340,6 +448,10 @@ public class WhiteBoard extends JFrame{
 	public static void main(String[] args){
 		WhiteBoard thisBoard = new WhiteBoard();
 		thisBoard.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		//For client testing
+		//WhiteBoard thisBoard1 = new WhiteBoard();
+		//thisBoard1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
 }
