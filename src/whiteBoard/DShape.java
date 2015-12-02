@@ -62,7 +62,7 @@ public abstract class DShape {
 		getShapeModel().setRect(newRectWithPts(stationaryKnob, newKnobPos));
 	}
 	
-	protected Point knobSelecter(Point click, Point selectedKnob){
+	protected Point knobSelector(Point click, Point selectedKnob){
 		int num = 0;
 		ArrayList<Point> currKnobs = calcKnobs();
 		for(Point knob : currKnobs){
