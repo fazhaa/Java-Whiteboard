@@ -49,7 +49,7 @@ public class WhiteBoard extends JFrame{
 	private	JMenuItem	startServer;
 	private	JMenuItem	startClient;
 	private	JMenuItem	exit;
-	private static JFileChooser	openFile;
+	private static JFileChooser	fileChooser;
 	private int returnVal;
 	//private JButton save;
 	//private JButton open;
@@ -393,11 +393,21 @@ public class WhiteBoard extends JFrame{
 		
 		save.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String result = JOptionPane.showInputDialog("File Name", null);
+				/*String result = JOptionPane.showInputDialog("File Name", null);
                 if (result != null) {
                     File f = new File(result);
                     theCanvas.save(f);
-                }
+                }*/
+				fileChooser = new JFileChooser();
+				fileChooser.setDialogTitle("Save Title");
+				returnVal = fileChooser.showSaveDialog(WhiteBoard.this);
+				
+				if(returnVal == fileChooser.APPROVE_OPTION)
+				{
+					File file = fileChooser.getSelectedFile();
+					theCanvas.save(file);
+					fileChooser.disable();
+				}
 			}
 		});
 		
@@ -408,14 +418,14 @@ public class WhiteBoard extends JFrame{
                     File f = new File(result);
                     theCanvas.open(f);
                 }*/
-				openFile = new JFileChooser();
-				returnVal = openFile.showOpenDialog(WhiteBoard.this);
+				fileChooser = new JFileChooser();
+				returnVal = fileChooser.showOpenDialog(WhiteBoard.this);
 				if(returnVal == JFileChooser.APPROVE_OPTION)
 				{
-					File file = openFile.getSelectedFile();
+					File file = fileChooser.getSelectedFile();
 					file = file.getAbsoluteFile();
 					theCanvas.open(file);
-					openFile.disable();
+					fileChooser.disable();
 				}
 				
 				
