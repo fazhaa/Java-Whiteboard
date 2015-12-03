@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferedImage;
 import java.util.*;
 
 import javax.swing.*;
@@ -302,6 +303,24 @@ public class Canvas extends JPanel{
 	            e.printStackTrace();
 	        }
 			
+		}
+		
+		public void saveScreenshot(File file) {
+			// Create an image bitmap, same size as ourselves
+	        BufferedImage image = (BufferedImage) createImage(getWidth(), getHeight());
+	        // Get Graphics pointing to the bitmap, and call paintAll()
+	        // This is the RARE case where calling paint() is appropriate
+	        // (normally the system calls paint()/paintComponent())
+	        Graphics g = image.getGraphics();
+	        paintAll(g);
+	        g.dispose(); // Good but not required--
+	        // dispose() Graphics you create yourself when done with them.
+	        try {
+	            javax.imageio.ImageIO.write(image, "PNG", file);
+	        }
+	        catch (IOException ex) {
+	            ex.printStackTrace();
+	        }
 		}
 		
 		public void open(File file) {
