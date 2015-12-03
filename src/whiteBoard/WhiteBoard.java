@@ -4,7 +4,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.util.Scanner;
 import java.util.Vector;
 
 import javax.swing.*;
@@ -49,8 +48,6 @@ public class WhiteBoard extends JFrame{
 	private	JMenuItem	startServer;
 	private	JMenuItem	startClient;
 	private	JMenuItem	exit;
-	private static JFileChooser	fileChooser;
-	private int returnVal;
 	//private JButton save;
 	//private JButton open;
 	//private JButton	startServer;
@@ -265,6 +262,7 @@ public class WhiteBoard extends JFrame{
 				newModel.setStartPt(new Point(150, 150));
 				newModel.setEndPt(new Point(200, 200));
 				theCanvas.addShape(newModel);
+				theCanvas.sendToAllRemotes(1, newModel);
 			}
 		});
 		text.addActionListener(new ActionListener() {
@@ -276,6 +274,7 @@ public class WhiteBoard extends JFrame{
 				newModel.addDsmListener(new DShapeModel.dsmListener(){
 					public void dsmChanged(DShapeModel dsm){
 						updateTextInspector();
+						theCanvas.sendToAllRemotes(5, theCanvas.selectedShape.getShapeModel());
 					}
 				});
 			}
@@ -286,6 +285,7 @@ public class WhiteBoard extends JFrame{
 				if(shape != null){
 					if(shape.getShapeModel() instanceof DTextModel)
 						((DTextModel)shape.getShapeModel()).setText(textField.getText());
+						theCanvas.sendToAllRemotes(5, shape.getShapeModel());
 				}
 			}
 		});
@@ -295,6 +295,7 @@ public class WhiteBoard extends JFrame{
 				if(shape != null){
 					if(shape.getShapeModel() instanceof DTextModel)
 						((DTextModel)shape.getShapeModel()).setFont(textSelect.getSelectedItem().toString());
+						theCanvas.sendToAllRemotes(5, shape.getShapeModel());
 				}
 			}
 		});
@@ -309,10 +310,12 @@ public class WhiteBoard extends JFrame{
 					
 					colorOk.addActionListener(new ActionListener() {
 						
+						@Override
 						public void actionPerformed(ActionEvent e) {
-							theCanvas.selectedShape.getShapeModel().setColor(colorChooser.getColor());
+							DShape shape = theCanvas.selectedShape;
+							shape.getShapeModel().setColor(colorChooser.getColor());
+							theCanvas.sendToAllRemotes(5, shape.getShapeModel());
 							colorFrame.setVisible(false);
-							
 						}
 					});
 					
@@ -325,7 +328,9 @@ public class WhiteBoard extends JFrame{
 			public void actionPerformed(ActionEvent e) {
 			if(theCanvas.selectedShape != null)
 			{
-				theCanvas.removeShape(theCanvas.selectedShape);
+				DShape shape = theCanvas.selectedShape;
+				theCanvas.removeShape(shape);
+				theCanvas.sendToAllRemotes(2, shape.getShapeModel());
 			}
 			}
 		});
@@ -334,7 +339,9 @@ public class WhiteBoard extends JFrame{
 			public void actionPerformed(ActionEvent e) {
 				if(theCanvas.selectedShape != null)
 				{
-					theCanvas.shapeToFront(theCanvas.selectedShape);
+					DShape shape = theCanvas.selectedShape;
+					theCanvas.shapeToFront(shape);
+					theCanvas.sendToAllRemotes(3, shape.getShapeModel());
 				}
 			}
 		});
@@ -343,7 +350,9 @@ public class WhiteBoard extends JFrame{
 			public void actionPerformed(ActionEvent e) {
 				if(theCanvas.selectedShape != null)
 				{
-					theCanvas.shapeToBack(theCanvas.selectedShape);
+					DShape shape = theCanvas.selectedShape;
+					theCanvas.shapeToBack(shape);
+					theCanvas.sendToAllRemotes(4, shape.getShapeModel());
 				}
 			}
 		});
@@ -371,6 +380,7 @@ public class WhiteBoard extends JFrame{
 				caution.setVisible(true);
 				no.addActionListener(new ActionListener() {
 					
+					@Override
 					public void actionPerformed(ActionEvent e) {
 						caution.setVisible(false);
 						caution.dispose();
@@ -379,6 +389,7 @@ public class WhiteBoard extends JFrame{
 				
 				yes.addActionListener(new ActionListener() {
 					
+					@Override
 					public void actionPerformed(ActionEvent e) {
 						theCanvas.shapeList.clear();
 						theCanvas.repaint();
@@ -393,42 +404,21 @@ public class WhiteBoard extends JFrame{
 		
 		save.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				/*String result = JOptionPane.showInputDialog("File Name", null);
+				String result = JOptionPane.showInputDialog("File Name", null);
                 if (result != null) {
                     File f = new File(result);
                     theCanvas.save(f);
-                }*/
-				fileChooser = new JFileChooser();
-				fileChooser.setDialogTitle("Save Title");
-				returnVal = fileChooser.showSaveDialog(WhiteBoard.this);
-				
-				if(returnVal == fileChooser.APPROVE_OPTION)
-				{
-					File file = fileChooser.getSelectedFile();
-					theCanvas.save(file);
-					fileChooser.disable();
-				}
+                }
 			}
 		});
 		
 		open.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				/*String result = JOptionPane.showInputDialog("File Name", null);
+				String result = JOptionPane.showInputDialog("File Name", null);
                 if (result != null) {
                     File f = new File(result);
                     theCanvas.open(f);
-                }*/
-				fileChooser = new JFileChooser();
-				returnVal = fileChooser.showOpenDialog(WhiteBoard.this);
-				if(returnVal == JFileChooser.APPROVE_OPTION)
-				{
-					File file = fileChooser.getSelectedFile();
-					file = file.getAbsoluteFile();
-					theCanvas.open(file);
-					fileChooser.disable();
-				}
-				
-				
+                }
 			}
 		});
 		
@@ -467,12 +457,11 @@ public class WhiteBoard extends JFrame{
 	}
 	
 	public static void main(String[] args){
-		WhiteBoard thisBoard = new WhiteBoard();
-		thisBoard.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		//For client testing
-		//WhiteBoard thisBoard1 = new WhiteBoard();
-		//thisBoard1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		WhiteBoard[] thisBoard = new WhiteBoard[3];
+		for (int i = 0; i < thisBoard.length; i++) {
+			thisBoard[i] = new WhiteBoard();
+			thisBoard[i].setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		}	
 	}
 
 }

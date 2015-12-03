@@ -32,7 +32,7 @@ public class Canvas extends JPanel{
 	private ClientHandler clientHandler;
     private ServerAccepter serverAccepter;
     String mode = "";
-    String[] cmdList = {"add", "remove", "front", "back", "change"};
+    String[] cmdList = {"", "add", "remove", "front", "back", "change"};
 	
 	//internal interface to keep track of shapes
 	protected static interface ShapeListListener{
@@ -153,12 +153,14 @@ public class Canvas extends JPanel{
 		shapeList.add(shape);
 		dsm.addDsmListener(new DShapeModel.dsmListener(){
 
+			@Override
 			public void dsmChanged(DShapeModel dsm) {
 				repaint();
 			}
 		});
 		setSelectedShape(shape);
 		repaint();
+		sendToAllRemotes(1, dsm);
 		for(ShapeListListener listener : shapeListListeners)
 			listener.shapeAdded(shape);
 	}
@@ -260,12 +262,14 @@ public class Canvas extends JPanel{
 					if(position.isResizing()){
 						selectedShape.knobResizer(position.resizeStationaryKnob,
 								position.resizeCursorKnob, deltaPosition);
+						sendToAllRemotes(5, selectedShape.getShapeModel());
 					}
 					else if(position.isMovingShape()){
 						Point newLoc = new Point
 								(position.startShapeLocation.x + deltaPosition.x,
 										position.startShapeLocation.y + deltaPosition.y);
 						selectedShape.getShapeModel().setLocation(newLoc);
+						sendToAllRemotes(5, selectedShape.getShapeModel());
 					}
 				}
 			}
@@ -322,6 +326,11 @@ public class Canvas extends JPanel{
 		}
 		// Send the new changes from server to all the clients
 		public synchronized void sendToAllRemotes(int cmdIndex, DShapeModel target) {
+			//Only send new change to output stream when in Server Mode
+			if(mode.equals("Server") == false) {
+				return;
+			}
+			
 			OutputStream memStream = new ByteArrayOutputStream();
 			XMLEncoder encoder = new XMLEncoder(memStream);
 			
@@ -371,7 +380,38 @@ public class Canvas extends JPanel{
 			}
 		}
 		
-		
+		public synchronized void applyServerUpdate(int cmdIndex, DShapeModel update) {
+			DShape outdated = getShapeByID(update.shapeID);
+			
+			if (cmdIndex != 1 && outdated == null) {
+				System.out.println("RIP - Sync Failed");
+			}
+			
+			else if (cmdIndex == 1) { //add
+				addShape(update);
+			}
+			else if (cmdIndex == 2) { //remove
+				removeShape(outdated);
+			}
+			else if (cmdIndex == 3) { //front
+				shapeToFront(outdated);
+			}
+			else if (cmdIndex == 4) { //back
+				shapeToBack(outdated);
+			}
+			/**
+			 * The strategy required for all "change" cmds is to
+			 * use the outdated.getShapeModel.mimic(update) function
+			 * But since mimic method hasn't been implemented yet,
+			 * and I Ain't Got Time For That, so do this instead:
+			 * remove(outdated) -> add(update)
+			 * 
+			 */
+			else if (cmdIndex == 5) { //change
+				removeShape(outdated);
+				addShape(update);
+			}
+		}
 		
 		public synchronized void addOutStream(ObjectOutputStream outStr) {
 	    	outStreams.add(outStr);
@@ -431,11 +471,18 @@ public class Canvas extends JPanel{
   				//Listen to new changes from the server
   				while (true) {
   					String cmd = (String) fromServer.readObject();
+  					//System.out.println(cmd);
   					xmlString = (String) fromServer.readObject();
+  					//System.out.println(xmlString);
   					decoder = new XMLDecoder(new ByteArrayInputStream(xmlString.getBytes()));
   					DShapeModel newDSM = (DShapeModel) decoder.readObject();
   					decoder.close();
-  					//TODO: Base on the cmd String, modify the newDSM correctly
+  					// Apply new configuration
+  					for (int i = 1; i < cmdList.length; i++) {
+  						if(cmd.equals(cmdList[i]) == true) {
+  							applyServerUpdate(i, newDSM);
+  						}
+  					}
   				}
   			}
   			catch(Exception ex) {
