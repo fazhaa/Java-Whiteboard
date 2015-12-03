@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.Scanner;
 import java.util.Vector;
 
 import javax.swing.*;
@@ -48,6 +49,8 @@ public class WhiteBoard extends JFrame{
 	private	JMenuItem	startServer;
 	private	JMenuItem	startClient;
 	private	JMenuItem	exit;
+	private static JFileChooser	fileChooser;
+	private int returnVal;
 	//private JButton save;
 	//private JButton open;
 	//private JButton	startServer;
@@ -285,7 +288,7 @@ public class WhiteBoard extends JFrame{
 				if(shape != null){
 					if(shape.getShapeModel() instanceof DTextModel)
 						((DTextModel)shape.getShapeModel()).setText(textField.getText());
-						theCanvas.sendToAllRemotes(5, shape.getShapeModel());
+					theCanvas.sendToAllRemotes(5, shape.getShapeModel());
 				}
 			}
 		});
@@ -295,7 +298,7 @@ public class WhiteBoard extends JFrame{
 				if(shape != null){
 					if(shape.getShapeModel() instanceof DTextModel)
 						((DTextModel)shape.getShapeModel()).setFont(textSelect.getSelectedItem().toString());
-						theCanvas.sendToAllRemotes(5, shape.getShapeModel());
+					theCanvas.sendToAllRemotes(5, shape.getShapeModel());
 				}
 			}
 		});
@@ -310,12 +313,12 @@ public class WhiteBoard extends JFrame{
 					
 					colorOk.addActionListener(new ActionListener() {
 						
-						@Override
 						public void actionPerformed(ActionEvent e) {
 							DShape shape = theCanvas.selectedShape;
 							shape.getShapeModel().setColor(colorChooser.getColor());
 							theCanvas.sendToAllRemotes(5, shape.getShapeModel());
 							colorFrame.setVisible(false);
+							
 						}
 					});
 					
@@ -380,7 +383,6 @@ public class WhiteBoard extends JFrame{
 				caution.setVisible(true);
 				no.addActionListener(new ActionListener() {
 					
-					@Override
 					public void actionPerformed(ActionEvent e) {
 						caution.setVisible(false);
 						caution.dispose();
@@ -389,7 +391,6 @@ public class WhiteBoard extends JFrame{
 				
 				yes.addActionListener(new ActionListener() {
 					
-					@Override
 					public void actionPerformed(ActionEvent e) {
 						theCanvas.shapeList.clear();
 						theCanvas.repaint();
@@ -404,21 +405,42 @@ public class WhiteBoard extends JFrame{
 		
 		save.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String result = JOptionPane.showInputDialog("File Name", null);
+				/*String result = JOptionPane.showInputDialog("File Name", null);
                 if (result != null) {
                     File f = new File(result);
                     theCanvas.save(f);
-                }
+                }*/
+				fileChooser = new JFileChooser();
+				fileChooser.setDialogTitle("Save Title");
+				returnVal = fileChooser.showSaveDialog(WhiteBoard.this);
+				
+				if(returnVal == fileChooser.APPROVE_OPTION)
+				{
+					File file = fileChooser.getSelectedFile();
+					theCanvas.save(file);
+					fileChooser.disable();
+				}
 			}
 		});
 		
 		open.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String result = JOptionPane.showInputDialog("File Name", null);
+				/*String result = JOptionPane.showInputDialog("File Name", null);
                 if (result != null) {
                     File f = new File(result);
                     theCanvas.open(f);
-                }
+                }*/
+				fileChooser = new JFileChooser();
+				returnVal = fileChooser.showOpenDialog(WhiteBoard.this);
+				if(returnVal == JFileChooser.APPROVE_OPTION)
+				{
+					File file = fileChooser.getSelectedFile();
+					file = file.getAbsoluteFile();
+					theCanvas.open(file);
+					fileChooser.disable();
+				}
+				
+				
 			}
 		});
 		
@@ -457,11 +479,12 @@ public class WhiteBoard extends JFrame{
 	}
 	
 	public static void main(String[] args){
-		WhiteBoard[] thisBoard = new WhiteBoard[3];
-		for (int i = 0; i < thisBoard.length; i++) {
-			thisBoard[i] = new WhiteBoard();
-			thisBoard[i].setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		}	
+		WhiteBoard thisBoard = new WhiteBoard();
+		thisBoard.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		//For client testing
+		//WhiteBoard thisBoard1 = new WhiteBoard();
+		//thisBoard1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
 }

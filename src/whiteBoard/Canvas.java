@@ -153,7 +153,6 @@ public class Canvas extends JPanel{
 		shapeList.add(shape);
 		dsm.addDsmListener(new DShapeModel.dsmListener(){
 
-			@Override
 			public void dsmChanged(DShapeModel dsm) {
 				repaint();
 			}
@@ -330,7 +329,6 @@ public class Canvas extends JPanel{
 			if(mode.equals("Server") == false) {
 				return;
 			}
-			
 			OutputStream memStream = new ByteArrayOutputStream();
 			XMLEncoder encoder = new XMLEncoder(memStream);
 			
@@ -471,13 +469,11 @@ public class Canvas extends JPanel{
   				//Listen to new changes from the server
   				while (true) {
   					String cmd = (String) fromServer.readObject();
-  					//System.out.println(cmd);
   					xmlString = (String) fromServer.readObject();
-  					//System.out.println(xmlString);
   					decoder = new XMLDecoder(new ByteArrayInputStream(xmlString.getBytes()));
   					DShapeModel newDSM = (DShapeModel) decoder.readObject();
   					decoder.close();
-  					// Apply new configuration
+  				// Apply new configuration
   					for (int i = 1; i < cmdList.length; i++) {
   						if(cmd.equals(cmdList[i]) == true) {
   							applyServerUpdate(i, newDSM);
