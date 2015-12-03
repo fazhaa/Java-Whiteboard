@@ -4,9 +4,11 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
 import java.util.Scanner;
 import java.util.Vector;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
@@ -418,6 +420,18 @@ public class WhiteBoard extends JFrame{
 				{
 					File file = fileChooser.getSelectedFile();
 					theCanvas.save(file);
+					
+					String snapshotLocation = file.getAbsolutePath();
+					JPanel panel = theCanvas;
+					 BufferedImage bufImage = new BufferedImage(panel.getSize().width, panel.getSize().height,BufferedImage.TYPE_INT_RGB);
+				       panel.paint(bufImage.createGraphics());
+				       File imageFile = new File(file.getAbsolutePath()+".png");
+				    try{
+				        imageFile.createNewFile();
+				        ImageIO.write(bufImage, "png", imageFile);
+				    }catch(Exception ex){
+				    }
+				    
 					fileChooser.disable();
 				}
 			}
@@ -477,6 +491,7 @@ public class WhiteBoard extends JFrame{
 			textSelect.setEnabled(false);
 		}
 	}
+	
 	
 	public static void main(String[] args){
 		WhiteBoard thisBoard = new WhiteBoard();
