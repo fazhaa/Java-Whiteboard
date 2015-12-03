@@ -48,15 +48,13 @@ public class WhiteBoard extends JFrame{
 	private	JMenuItem	neww;
 	private JMenuItem	save;
 	private JMenuItem	open;
+	private JMenuItem	savePNG;
 	private	JMenuItem	startServer;
 	private	JMenuItem	startClient;
 	private	JMenuItem	exit;
 	private static JFileChooser	fileChooser;
 	private int returnVal;
-	//private JButton save;
-	//private JButton open;
-	//private JButton	startServer;
-	//private JButton	startClient;
+
 	/**
 	 * Color Chooser
 	 */
@@ -126,6 +124,7 @@ public class WhiteBoard extends JFrame{
 	}
 
 	
+	@SuppressWarnings("rawtypes")
 	public WhiteBoard(){
 		
 		super("White Board");
@@ -139,11 +138,6 @@ public class WhiteBoard extends JFrame{
 		shapesBox.add(oval = new JButton("Oval"));
 		shapesBox.add(line = new JButton("Line"));
 		shapesBox.add(text = new JButton("Text"));
-		//shapesBox.add(save = new JButton("Save"));
-		//shapesBox.add(open = new JButton("Open"));
-		//shapesBox.add(startServer = new JButton("Start Server Mode"));
-		//shapesBox.add(startClient = new JButton("Start Client Mode"));
-		//shapesBox.setMinimumSize(new Dimension(400, 50));
 		
 		/* File Menu*/
 		mb = new JMenuBar();
@@ -159,6 +153,8 @@ public class WhiteBoard extends JFrame{
 		save.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,ActionEvent.CTRL_MASK));
 		file.add(open = new JMenuItem("Open"));
 		open.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,ActionEvent.CTRL_MASK));
+		file.add(savePNG = new JMenuItem("Save PNG"));
+		save.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,ActionEvent.CTRL_MASK));
 		file.addSeparator();
 		file.add(exit = new JMenuItem("Exit"));
 		exit.setMnemonic(KeyEvent.VK_E);
@@ -407,11 +403,6 @@ public class WhiteBoard extends JFrame{
 		
 		save.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				/*String result = JOptionPane.showInputDialog("File Name", null);
-                if (result != null) {
-                    File f = new File(result);
-                    theCanvas.save(f);
-                }*/
 				fileChooser = new JFileChooser();
 				fileChooser.setDialogTitle("Save Title");
 				returnVal = fileChooser.showSaveDialog(WhiteBoard.this);
@@ -437,7 +428,23 @@ public class WhiteBoard extends JFrame{
 			}
 		});
 		
+		savePNG.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				fileChooser = new JFileChooser();
+				fileChooser.setDialogTitle("Save Title");
+				returnVal = fileChooser.showSaveDialog(WhiteBoard.this);
+				
+				if(returnVal == fileChooser.APPROVE_OPTION)
+				{
+					File file = fileChooser.getSelectedFile();
+					theCanvas.saveScreenshot(file);
+					fileChooser.disable();
+				}
+			}
+		});
+		
 		open.addActionListener(new ActionListener() {
+			
 			public void actionPerformed(ActionEvent e) {
 				/*String result = JOptionPane.showInputDialog("File Name", null);
                 if (result != null) {
@@ -494,12 +501,11 @@ public class WhiteBoard extends JFrame{
 	
 	
 	public static void main(String[] args){
-		WhiteBoard thisBoard = new WhiteBoard();
-		thisBoard.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		//For client testing
-		//WhiteBoard thisBoard1 = new WhiteBoard();
-		//thisBoard1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		WhiteBoard[] thisBoard = new WhiteBoard[3];
+		for (int i = 0; i < 3; i++){
+			thisBoard[i] = new WhiteBoard();
+			thisBoard[i].setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		}	
 	}
 
 }
