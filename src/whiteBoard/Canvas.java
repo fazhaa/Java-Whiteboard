@@ -153,7 +153,6 @@ public class Canvas extends JPanel{
 		shapeList.add(shape);
 		dsm.addDsmListener(new DShapeModel.dsmListener(){
 
-			@Override
 			public void dsmChanged(DShapeModel dsm) {
 				repaint();
 			}

@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.Scanner;
 import java.util.Vector;
 
 import javax.swing.*;
@@ -48,6 +49,8 @@ public class WhiteBoard extends JFrame{
 	private	JMenuItem	startServer;
 	private	JMenuItem	startClient;
 	private	JMenuItem	exit;
+	private static JFileChooser	openFile;
+	private int returnVal;
 	//private JButton save;
 	//private JButton open;
 	//private JButton	startServer;
@@ -306,7 +309,6 @@ public class WhiteBoard extends JFrame{
 					
 					colorOk.addActionListener(new ActionListener() {
 						
-						@Override
 						public void actionPerformed(ActionEvent e) {
 							theCanvas.selectedShape.getShapeModel().setColor(colorChooser.getColor());
 							colorFrame.setVisible(false);
@@ -369,7 +371,6 @@ public class WhiteBoard extends JFrame{
 				caution.setVisible(true);
 				no.addActionListener(new ActionListener() {
 					
-					@Override
 					public void actionPerformed(ActionEvent e) {
 						caution.setVisible(false);
 						caution.dispose();
@@ -378,7 +379,6 @@ public class WhiteBoard extends JFrame{
 				
 				yes.addActionListener(new ActionListener() {
 					
-					@Override
 					public void actionPerformed(ActionEvent e) {
 						theCanvas.shapeList.clear();
 						theCanvas.repaint();
@@ -403,11 +403,22 @@ public class WhiteBoard extends JFrame{
 		
 		open.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String result = JOptionPane.showInputDialog("File Name", null);
+				/*String result = JOptionPane.showInputDialog("File Name", null);
                 if (result != null) {
                     File f = new File(result);
                     theCanvas.open(f);
-                }
+                }*/
+				openFile = new JFileChooser();
+				returnVal = openFile.showOpenDialog(WhiteBoard.this);
+				if(returnVal == JFileChooser.APPROVE_OPTION)
+				{
+					File file = openFile.getSelectedFile();
+					file = file.getAbsoluteFile();
+					theCanvas.open(file);
+					openFile.disable();
+				}
+				
+				
 			}
 		});
 		
